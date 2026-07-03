@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Prep & Resume Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>PrepAI</h2>
+                <button class="new-chat-btn" id="newChatBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    New Interview
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="section-title">Previous Interviews</div>
+                <div class="chat-list" id="chatList">
+                    <!-- Chats will be rendered here dynamically -->
+                    <div class="no-chats">No interviews started yet</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <span class="session-lbl">Session Mode</span>
+                <span class="session-status active">Active</span>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Top Controls (Resume Upload and Status) -->
+            <header class="top-bar">
+                <div class="sidebar-toggle" id="sidebarToggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </div>
+                
+                <div class="upload-container">
+                    <div class="upload-controls">
+                        <label for="resumeInput" class="upload-btn" id="uploadBtnLabel">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <span>Upload Resume</span>
+                        </label>
+                        <input type="file" id="resumeInput" accept=".pdf,.docx" style="display: none;">
+                        <span class="file-name-display" id="fileNameDisplay">No file selected (PDF/DOCX)</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn secondary-btn" id="analyzeBtn" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Analyze Resume
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dual Workspace Layout -->
+            <div class="workspace-body">
+                
+                <!-- Left Panel: Resume Analysis -->
+                <section class="analysis-panel" id="analysisPanel">
+                    <div class="panel-header">
+                        <h3>Resume Analysis Insights</h3>
+                        <span class="badge" id="analysisStatusBadge">Pending Upload</span>
+                    </div>
+                    <div class="panel-content scrollable" id="analysisContent">
+                        <!-- Welcome / Upload Prompt -->
+                        <div class="empty-state-prompt" id="analysisEmptyState">
+                            <div class="empty-state-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <h4>Upload Your Resume</h4>
+                            <p>Once you upload your PDF or Word resume, Gemini will extract the text, analyze your profile, and give you professional feedback here.</p>
+                        </div>
+                        
+                        <!-- Analysis loading state -->
+                        <div class="loading-state hidden" id="analysisLoading">
+                            <div class="spinner"></div>
+                            <p>Gemini is parsing and analyzing your resume...</p>
+                        </div>
+
+                        <!-- Real Analysis Content (Initially Hidden) -->
+                        <div class="analysis-results hidden" id="analysisResults">
+                            <div class="analysis-card summary-card">
+                                <h4>Professional Summary</h4>
+                                <p id="analysisSummary">Loading summary...</p>
+                            </div>
+
+                            <div class="skills-grid">
+                                <div class="analysis-card">
+                                    <div class="card-header">
+                                        <svg class="icon-skill-tech" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                        <h4>Technical Skills</h4>
+                                    </div>
+                                    <div class="tag-container" id="techSkillsTags"></div>
+                                </div>
+                                <div class="analysis-card">
+                                    <div class="card-header">
+                                        <svg class="icon-skill-soft" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        <h4>Soft Skills</h4>
+                                    </div>
+                                    <div class="tag-container" id="softSkillsTags"></div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-card">
+                                <h4>Key Projects</h4>
+                                <ul class="bullet-list" id="projectsList"></ul>
+                            </div>
+
+                            <div class="analysis-card warning-card">
+                                <h4>Weak Bullet Points & Rewrites</h4>
+                                <ul class="bullet-list" id="weakBulletPointsList"></ul>
+                            </div>
+
+                            <div class="analysis-card accent-card">
+                                <h4>Resume Improvements</h4>
+                                <ul class="bullet-list" id="improvementsList"></ul>
+                            </div>
+
+                            <div class="analysis-card">
+                                <h4>Suggested Missing Skills</h4>
+                                <div class="tag-container" id="missingSkillsTags"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Divider for dragging/resizing (Optional/Visual) -->
+                <div class="panel-divider" id="panelDivider"></div>
+
+                <!-- Right Panel: Interview Chat -->
+                <section class="chat-panel" id="chatPanel">
+                    <div class="panel-header chat-header">
+                        <div class="chat-header-info">
+                            <h3 id="currentChatTitle">Mock Interview</h3>
+                            <p id="chatSubtitle">Select a chat or upload a resume to start</p>
+                        </div>
+                        <button class="toggle-analysis-btn" id="toggleAnalysisBtn" title="Toggle Resume Analysis Panel">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        </button>
+                    </div>
+
+                    <!-- Chat Message Area -->
+                    <div class="chat-messages scrollable" id="chatMessages">
+                        <div class="chat-welcome-state" id="chatWelcomeState">
+                            <div class="chat-welcome-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <h3>AI Mock Interviewer</h3>
+                            <p class="chat-welcome-desc">Upload your resume first to activate the mock interview. The AI interviewer will ask tailored questions based on your experience, starting with simple warm-ups and advancing to deep technical discussions.</p>
+                            
+                            <div class="chat-tips">
+                                <div class="tip-item">
+                                    <span class="tip-badge">Step 1</span>
+                                    <span>Upload your PDF/DOCX resume using the button above.</span>
+                                </div>
+                                <div class="tip-item">
+                                    <span class="tip-badge">Step 2</span>
+                                    <span>Click "Analyze Resume" for AI insights (optional but recommended).</span>
+                                </div>
+                                <div class="tip-item">
+                                    <span class="tip-badge">Step 3</span>
+                                    <span>Click "New Interview" or start typing to begin the simulator!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Area -->
+                    <footer class="chat-input-area">
+                        <div class="typing-indicator hidden" id="typingIndicator">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="typing-text">Interviewer is formulating a question...</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <textarea 
+                                id="chatInput" 
+                                placeholder="Type your response here..." 
+                                rows="1" 
+                                disabled
+                            ></textarea>
+                            <button id="sendBtn" class="send-btn" disabled>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </div>
+                        <div class="input-info">Press Enter to send, Shift + Enter for new line.</div>
+                    </footer>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+
+    <!-- User Feedback Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
